@@ -7,5 +7,5 @@ RUN make install test-install
 FROM openshift/origin-base
 USER 65532
 
-COPY --from=builder /go/bin/wathola-forwarder /usr/bin/wathola-forwarder
-ENTRYPOINT ["/usr/bin/wathola-forwarder"]
+COPY --from=builder /go/bin/migrate /usr/bin/migrate
+ENTRYPOINT ["/usr/bin/migrate"]
