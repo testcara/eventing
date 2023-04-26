@@ -1,0 +1,3 @@
+project:
+  tag: knative-knative-v1.10.0
+  imagePrefix: knative-eventing
