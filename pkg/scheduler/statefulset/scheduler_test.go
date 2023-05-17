@@ -88,6 +88,32 @@ func TestStatefulsetScheduler(t *testing.T) {
 			schedulerPolicyType: scheduler.MAXFILLUP,
 		},
 		{
+			name:      "one replica, 8 vreplicas, already scheduled on unschedulable pod, add replicas",
+			vreplicas: 8,
+			replicas:  int32(1),
+			placements: []duckv1alpha1.Placement{
+				{PodName: "statefulset-name-0", VReplicas: 3},
+				{PodName: "statefulset-name-2", VReplicas: 5},
+			},
+			expected: []duckv1alpha1.Placement{
+				{PodName: "statefulset-name-0", VReplicas: 8},
+			},
+			schedulerPolicyType: scheduler.MAXFILLUP,
+		},
+		{
+			name:      "one replica, 1 vreplicas, already scheduled on unschedulable pod, remove replicas",
+			vreplicas: 1,
+			replicas:  int32(1),
+			placements: []duckv1alpha1.Placement{
+				{PodName: "statefulset-name-0", VReplicas: 3},
+				{PodName: "statefulset-name-2", VReplicas: 5},
+			},
+			expected: []duckv1alpha1.Placement{
+				{PodName: "statefulset-name-0", VReplicas: 1},
+			},
+			schedulerPolicyType: scheduler.MAXFILLUP,
+		},
+		{
 			name:                "one replica, 15 vreplicas, unschedulable",
 			vreplicas:           15,
 			replicas:            int32(1),
@@ -748,7 +774,12 @@ func TestStatefulsetScheduler(t *testing.T) {
 			lsp := listers.NewListers(podlist)
 			lsn := listers.NewListers(nodelist)
 			sa := state.NewStateBuilder(ctx, testNs, sfsName, vpodClient.List, 10, tc.schedulerPolicyType, tc.schedulerPolicy, tc.deschedulerPolicy, lsp.GetPodLister().Pods(testNs), lsn.GetNodeLister())
-			s := NewStatefulSetScheduler(ctx, testNs, sfsName, vpodClient.List, sa, nil, lsp.GetPodLister().Pods(testNs)).(*StatefulSetScheduler)
+			cfg := &Config{
+				StatefulSetNamespace: testNs,
+				StatefulSetName:      sfsName,
+				VPodLister:           vpodClient.List,
+			}
+			s := newStatefulSetScheduler(ctx, cfg, sa, nil, lsp.GetPodLister().Pods(testNs)).(*StatefulSetScheduler)
 			if tc.pending != nil {
 				s.pending = tc.pending
 			}
@@ -841,7 +872,12 @@ func TestReservePlacements(t *testing.T) {
 			vpodClient := tscheduler.NewVPodClient()
 			vpodClient.Append(tc.vpod)
 
-			s := NewStatefulSetScheduler(ctx, testNs, sfsName, vpodClient.List, nil, nil, nil).(*StatefulSetScheduler)
+			cfg := &Config{
+				StatefulSetNamespace: testNs,
+				StatefulSetName:      sfsName,
+				VPodLister:           vpodClient.List,
+			}
+			s := newStatefulSetScheduler(ctx, cfg, nil, nil, nil).(*StatefulSetScheduler)
 			s.reservePlacements(tc.vpod, tc.vpod.GetPlacements()) //initial reserve
 
 			s.reservePlacements(tc.vpod, tc.placements) //new reserve
