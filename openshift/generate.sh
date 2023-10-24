@@ -6,6 +6,7 @@ repo_root_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..
 
 "${repo_root_dir}/hack/update-deps.sh" || exit 1
 git apply "${repo_root_dir}/openshift/patches/005-k8s-min.patch"
+git apply "${repo_root_dir}/openshift/patches/011-http2-cve.patch"
 git apply "${repo_root_dir}/openshift/patches/018-rekt-test-override-kopublish.patch"
 git apply "${repo_root_dir}/openshift/patches/018-rekt-test-image-pod.patch"
 git apply "${repo_root_dir}/openshift/patches/020-mutemetrics.patch"
