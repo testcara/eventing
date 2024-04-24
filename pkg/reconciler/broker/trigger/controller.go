@@ -19,12 +19,16 @@ package mttrigger
 import (
 	"context"
 
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"knative.dev/eventing/pkg/auth"
+
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 	"knative.dev/pkg/client/injection/ducks/duck/v1/source"
 	configmapinformer "knative.dev/pkg/client/injection/kube/informers/core/v1/configmap"
-	serviceaccountinformer "knative.dev/pkg/client/injection/kube/informers/core/v1/serviceaccount"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/injection/clients/dynamicclient"
@@ -45,6 +49,8 @@ import (
 	eventinglisters "knative.dev/eventing/pkg/client/listers/eventing/v1"
 	"knative.dev/eventing/pkg/duck"
 	kubeclient "knative.dev/pkg/client/injection/kube/client"
+
+	serviceaccountinformer "knative.dev/pkg/client/injection/kube/informers/core/v1/serviceaccount/filtered"
 )
 
 // NewController initializes the controller and is called by the generated code
@@ -59,7 +65,7 @@ func NewController(
 	subscriptionInformer := subscriptioninformer.Get(ctx)
 	configmapInformer := configmapinformer.Get(ctx)
 	secretInformer := secretinformer.Get(ctx)
-	serviceaccountInformer := serviceaccountinformer.Get(ctx)
+	oidcServiceaccountInformer := serviceaccountinformer.Get(ctx, auth.OIDCLabelSelector)
 
 	featureStore := feature.NewStore(logging.FromContext(ctx).Named("feature-config-store"))
 	featureStore.WatchConfigs(cmw)
@@ -74,7 +80,7 @@ func NewController(
 		triggerLister:        triggerLister,
 		configmapLister:      configmapInformer.Lister(),
 		secretLister:         secretInformer.Lister(),
-		serviceAccountLister: serviceaccountInformer.Lister(),
+		serviceAccountLister: oidcServiceaccountInformer.Lister(),
 	}
 	impl := triggerreconciler.NewImpl(ctx, r, func(impl *controller.Impl) controller.Options {
 		return controller.Options{
@@ -112,12 +118,40 @@ func NewController(
 	})
 
 	// Reconciler Trigger when the OIDC service account changes
-	serviceaccountInformer.Informer().AddEventHandler(cache.FilteringResourceEventHandler{
-		FilterFunc: controller.FilterController(&eventing.Trigger{}),
+	oidcServiceaccountInformer.Informer().AddEventHandler(cache.FilteringResourceEventHandler{
+		FilterFunc: filterOIDCServiceAccounts(triggerInformer.Lister(), brokerInformer.Lister()),
 		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
 	})
 
 	return impl
+}
+
+// filterOIDCServiceAccounts returns a function that returns true if the resource passed
+// is a service account, which is owned by a trigger pointing to a MTChannelBased broker.
+func filterOIDCServiceAccounts(triggerLister eventinglisters.TriggerLister, brokerLister eventinglisters.BrokerLister) func(interface{}) bool {
+	return func(obj interface{}) bool {
+		controlledByTrigger := controller.FilterController(&eventing.Trigger{})(obj)
+		if !controlledByTrigger {
+			return false
+		}
+
+		sa, ok := obj.(*corev1.ServiceAccount)
+		if !ok {
+			return false
+		}
+
+		owner := metav1.GetControllerOf(sa)
+		if owner == nil {
+			return false
+		}
+
+		trigger, err := triggerLister.Triggers(sa.Namespace).Get(owner.Name)
+		if err != nil {
+			return false
+		}
+
+		return filterTriggers(brokerLister)(trigger)
+	}
 }
 
 // filterTriggers returns a function that returns true if the resource passed
