@@ -4,9 +4,12 @@ set -xeuo pipefail
 
 repo_root_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..
 
-# make sure we install the latest version
-rm -f $(go env GOPATH)/bin/generate
-GO111MODULE=off go install github.com/openshift-knative/hack/cmd/generate
+tmp_dir=$(mktemp -d)
+git clone --branch main https://github.com/openshift-knative/hack "$tmp_dir"
+
+pushd "$tmp_dir"
+go install github.com/openshift-knative/hack/cmd/generate
+popd
 
 $(go env GOPATH)/bin/generate \
   --root-dir "${repo_root_dir}" \
