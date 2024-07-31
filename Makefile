@@ -28,23 +28,23 @@ test-install:
 .PHONY: test-install
 
 test-e2e:
-	sh openshift/e2e-tests.sh
+	openshift/e2e-tests.sh
 .PHONY: test-e2e
 
 test-conformance:
-	sh openshift/e2e-conformance-tests.sh
+	openshift/e2e-conformance-tests.sh
 .PHONY: test-conformance
 
 test-reconciler:
-	sh openshift/e2e-rekt-tests.sh
+	openshift/e2e-rekt-tests.sh
 .PHONY: test-reconciler
 
 test-experimental:
-	sh openshift/e2e-experimental-tests.sh
+	openshift/e2e-experimental-tests.sh
 .PHONY: test-experimental
 
 test-encryption-auth-e2e:
-	sh openshift/e2e-encryption-auth-tests.sh
+	openshift/e2e-encryption-auth-tests.sh
 .PHONY: test-encryption-auth-e2e
 
 # Target used by github actions.
@@ -75,9 +75,3 @@ test-e2e-local:
 generate-release:
 	./openshift/release/generate-release.sh
 .PHONY: generate-release
-
-# Update CI configuration in the $(OPENSHIFT) directory.
-# NOTE: Makes changes outside this repository.
-update-ci:
-	sh ./openshift/ci-operator/update-ci.sh $(OPENSHIFT) $(CORE_IMAGES)
-.PHONY: update-ci
