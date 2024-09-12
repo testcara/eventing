@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-channel-dispatcher-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-channel-dispatcher
+    name: serverless-operator-135/kn-eventing-channel-dispatcher
     visibility: public

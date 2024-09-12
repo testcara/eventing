@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-pong-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-pong
+    name: serverless-operator-135/kn-eventing-pong
     visibility: public

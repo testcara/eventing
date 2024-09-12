@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-test-eventshub-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-test-eventshub
+    name: serverless-operator-135/kn-eventing-test-eventshub
     visibility: public

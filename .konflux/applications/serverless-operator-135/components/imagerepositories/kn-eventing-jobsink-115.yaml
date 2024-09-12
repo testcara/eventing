@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-jobsink-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-jobsink
+    name: serverless-operator-135/kn-eventing-jobsink
     visibility: public

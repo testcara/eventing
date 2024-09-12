@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-heartbeats-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-heartbeats
+    name: serverless-operator-135/kn-eventing-heartbeats
     visibility: public

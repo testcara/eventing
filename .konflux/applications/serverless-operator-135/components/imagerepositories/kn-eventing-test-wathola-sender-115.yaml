@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-test-wathola-sender-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-test-wathola-sender
+    name: serverless-operator-135/kn-eventing-test-wathola-sender
     visibility: public
