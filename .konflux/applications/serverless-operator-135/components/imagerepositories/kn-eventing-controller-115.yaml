@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-controller-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-controller
+    name: serverless-operator-135/kn-eventing-controller
     visibility: public

@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-appender-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-appender
+    name: serverless-operator-135/kn-eventing-appender
     visibility: public

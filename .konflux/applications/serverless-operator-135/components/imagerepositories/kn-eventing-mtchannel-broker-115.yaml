@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-mtchannel-broker-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-mtchannel-broker
+    name: serverless-operator-135/kn-eventing-mtchannel-broker
     visibility: public

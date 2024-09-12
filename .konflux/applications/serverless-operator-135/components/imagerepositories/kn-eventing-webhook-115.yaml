@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-webhook-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-webhook
+    name: serverless-operator-135/kn-eventing-webhook
     visibility: public

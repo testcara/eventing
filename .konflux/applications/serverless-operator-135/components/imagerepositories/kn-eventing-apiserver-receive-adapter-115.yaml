@@ -9,5 +9,5 @@ metadata:
   name: kn-eventing-apiserver-receive-adapter-115
 spec:
   image:
-    name: serverless-operator-135/knative-eventing-apiserver-receive-adapter
+    name: serverless-operator-135/kn-eventing-apiserver-receive-adapter
     visibility: public
